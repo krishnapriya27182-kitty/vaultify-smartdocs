@@ -73,8 +73,8 @@ function uploadBufferToGridFs(file, ownerId) {
     });
 
     uploadStream.on("error", reject);
-    uploadStream.on("finish", (uploadedFile) => {
-      resolve(uploadedFile._id);
+    uploadStream.on("finish", () => {
+      resolve(uploadStream.id);
     });
 
     uploadStream.end(file.buffer);
@@ -481,6 +481,7 @@ app.post("/api/documents", requireAuth, upload.single("file"), async (req, res) 
 
     res.status(201).json(document);
   } catch (error) {
+    console.error("Create document error:", error.message);
     if (uploadedFileId) {
       await deleteGridFsFile(uploadedFileId).catch(() => {});
     }
@@ -542,6 +543,7 @@ app.put("/api/documents/:id", requireAuth, upload.single("file"), async (req, re
 
     res.json(document);
   } catch (error) {
+    console.error("Update document error:", error.message);
     if (uploadedFileId) {
       await deleteGridFsFile(uploadedFileId).catch(() => {});
     }
