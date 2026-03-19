@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vaultify SmartDocs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div id="globalMessage" class="message floating hidden"></div>
+
+      <section id="authScreen" class="auth-layout">
+        <div class="auth-copy">
+          <p class="eyebrow">Vaultify SmartDocs</p>
+          <h1>Your own secure document vault starts with your own account.</h1>
+          <p class="hero-copy">
+            Each user gets a personal sign-in, private storage space, and a
+            protected dashboard for viewing only their own important documents.
+          </p>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Private Access</h3>
+              <p>Documents are linked to the signed-in user only.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Password Security</h3>
+              <p>Each account uses its own email and password for safe login.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Reset Support</h3>
+              <p>Forgot-password flow helps users recover access quickly.</p>
+            </article>
+          </div>
+        </div>
+
+        <section class="panel auth-card">
+          <div class="auth-tabs">
+            <button id="loginTabBtn" class="tab-btn active" type="button">
+              Sign In
+            </button>
+            <button id="signupTabBtn" class="tab-btn" type="button">
+              Sign Up
+            </button>
+          </div>
+
+          <form id="loginForm" class="auth-form">
+            <h2>Welcome Back</h2>
+
+            <label>
+              Email Address
+              <input type="email" id="loginEmail" name="email" required />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                required
+                minlength="8"
+              />
+            </label>
+
+            <div class="inline-actions">
+              <button class="primary" type="submit">Sign In</button>
+              <button id="openResetBtn" class="link-btn" type="button">
+                Forgot Password?
+              </button>
+            </div>
+          </form>
+
+          <form id="signupForm" class="auth-form hidden">
+            <h2>Create Account</h2>
+
+            <label>
+              Full Name
+              <input type="text" id="signupName" name="fullName" required />
+            </label>
+
+            <label>
+              Email Address
+              <input type="email" id="signupEmail" name="email" required />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                required
+                minlength="8"
+              />
+            </label>
+
+            <label>
+              Confirm Password
+              <input
+                type="password"
+                id="signupConfirmPassword"
+                name="confirmPassword"
+                required
+                minlength="8"
+              />
+            </label>
+
+            <button class="primary" type="submit">Create Account</button>
+          </form>
+        </section>
+      </section>
+
+      <section id="appScreen" class="hidden">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">Personal Dashboard</p>
+            <h1 id="welcomeHeading">Secure your important documents.</h1>
+            <p class="hero-copy">
+              Upload, categorize, search, edit, and track expiry dates for your
+              own personal records in a protected vault.
+            </p>
+
+            <div class="profile-strip">
+              <div class="user-chip">
+                <span id="userInitials" class="user-initials">VS</span>
+                <div>
+                  <strong id="userName">Vaultify User</strong>
+                  <p id="userEmail">user@example.com</p>
+                </div>
+              </div>
+              <button id="logoutBtn" class="ghost" type="button">Logout</button>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="metric">
+              <span id="totalDocs">0</span>
+              <p>Total Documents</p>
+            </div>
+            <div class="metric">
+              <span id="expiringDocs">0</span>
+              <p>Expiring Soon</p>
+            </div>
+          </div>
+        </header>
+
+        <main class="dashboard">
+          <section class="panel form-panel">
+            <div class="panel-heading">
+              <h2 id="formTitle">Add New Document</h2>
+              <button id="cancelEditBtn" class="ghost hidden" type="button">
+                Cancel Edit
+              </button>
+            </div>
+
+            <form id="documentForm">
+              <input type="hidden" id="documentId" />
+
+              <label>
+                Title
+                <input type="text" id="title" name="title" required />
+              </label>
+
+              <label>
+                Category
+                <select id="category" name="category" required>
+                  <option value="">Select category</option>
+                  <option value="ID Proof">ID Proof</option>
+                  <option value="Education">Education</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Medical">Medical</option>
+                  <option value="Professional">Professional</option>
+                  <option value="Personal">Personal</option>
+                </select>
+              </label>
+
+              <label>
+                Description
+                <textarea id="description" name="description" rows="4"></textarea>
+              </label>
+
+              <label>
+                Expiry Date
+                <input type="date" id="expiryDate" name="expiryDate" />
+              </label>
+
+              <label>
+                Tags
+                <input
+                  type="text"
+                  id="tags"
+                  name="tags"
+                  placeholder="passport, tax, degree"
+                />
+              </label>
+
+              <label id="fileLabel">
+                Upload File
+                <input type="file" id="file" name="file" required />
+              </label>
+
+              <button class="primary" type="submit" id="submitBtn">
+                Save Document
+              </button>
+            </form>
+          </section>
+
+          <section class="panel records-panel">
+            <div class="toolbar">
+              <input
+                type="search"
+                id="searchInput"
+                placeholder="Search by title, description, or tag"
+              />
+              <select id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="ID Proof">ID Proof</option>
+                <option value="Education">Education</option>
+                <option value="Finance">Finance</option>
+                <option value="Medical">Medical</option>
+                <option value="Professional">Professional</option>
+                <option value="Personal">Personal</option>
+              </select>
+              <select id="statusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="expiring-soon">Expiring Soon</option>
+                <option value="expired">Expired</option>
+                <option value="no-expiry">No Expiry</option>
+              </select>
+            </div>
+
+            <div id="documentsGrid" class="documents-grid"></div>
+          </section>
+        </main>
+      </section>
+    </div>
+
+    <div id="resetModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="panel-heading">
+          <h2>Forgot Password</h2>
+          <button id="closeResetBtn" class="ghost" type="button">Close</button>
+        </div>
+
+        <p class="modal-copy">
+          Request a reset code for your email, then create a new password to
+          access your personal vault again.
+        </p>
+
+        <form id="resetRequestForm" class="auth-form compact-form">
+          <label>
+            Email Address
+            <input
+              type="email"
+              id="resetRequestEmail"
+              name="email"
+              required
+            />
+          </label>
+          <button class="primary" type="submit">Generate Reset Code</button>
+        </form>
+
+        <form id="resetPasswordForm" class="auth-form compact-form hidden">
+          <label>
+            Email Address
+            <input type="email" id="resetEmail" name="email" readonly />
+          </label>
+
+          <label>
+            Reset Code
+            <input type="text" id="resetCode" name="resetCode" required />
+          </label>
+
+          <label>
+            New Password
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              required
+              minlength="8"
+            />
+          </label>
+
+          <label>
+            Confirm Password
+            <input
+              type="password"
+              id="confirmResetPassword"
+              name="confirmPassword"
+              required
+              minlength="8"
+            />
+          </label>
+
+          <button class="primary" type="submit">Reset Password</button>
+        </form>
+
+        <div id="resetHelper" class="reset-helper hidden"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
