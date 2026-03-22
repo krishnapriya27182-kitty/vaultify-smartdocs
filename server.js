@@ -17,6 +17,7 @@ const RESET_CODE_EXPIRY_MINUTES =
   Number(process.env.RESET_CODE_EXPIRY_MINUTES) || 15;
 const MAX_FILE_SIZE_MB = Number(process.env.MAX_FILE_SIZE_MB) || 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const DEFAULT_STORAGE_LIMIT_BYTES = 30 * 1024 * 1024;
 const uploadsDir = path.join(__dirname, "uploads");
 
 if (!fs.existsSync(uploadsDir)) {
@@ -43,12 +44,122 @@ function isValidEmail(email = "") {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function normalizeOptionalEmail(email = "") {
+  const normalizedEmail = email.trim().toLowerCase();
+  return normalizedEmail && isValidEmail(normalizedEmail) ? normalizedEmail : "";
+}
+
+function parseBoolean(value, defaultValue = true) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    return !["false", "0", "off", "no"].includes(value.toLowerCase());
+  }
+
+  if (typeof value === "undefined") {
+    return defaultValue;
+  }
+
+  return Boolean(value);
+}
+
 function createUserPayload(user) {
   return {
     _id: user._id,
     fullName: user.fullName,
-    email: user.email
+    email: user.email,
+    recoveryEmail: user.recoveryEmail || "",
+    emailNotificationsEnabled: user.emailNotificationsEnabled !== false,
+    storageLimitBytes: user.storageLimitBytes || DEFAULT_STORAGE_LIMIT_BYTES,
+    storageUsedBytes: user.storageUsedBytes || 0
   };
+}
+
+async function calculateUserStorageUsage(userId) {
+  const [result] = await Document.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId)
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSize: { $sum: "$fileSize" }
+      }
+    }
+  ]);
+
+  return result ? result.totalSize : 0;
+}
+
+async function syncUserStorageUsage(user) {
+  const totalSize = await calculateUserStorageUsage(user._id);
+  user.storageUsedBytes = totalSize;
+  await user.save();
+  return totalSize;
+}
+
+async function buildNotificationsForUser(user) {
+  const documents = await Document.find({ owner: user._id }).sort({
+    expiryDate: 1,
+    createdAt: -1
+  });
+  const notifications = [];
+  const now = new Date();
+  const storageLimitBytes = user.storageLimitBytes || DEFAULT_STORAGE_LIMIT_BYTES;
+  const storageUsedBytes = user.storageUsedBytes || 0;
+  const usageRatio = storageLimitBytes ? storageUsedBytes / storageLimitBytes : 0;
+
+  if (usageRatio >= 1) {
+    notifications.push({
+      type: "storage-critical",
+      level: "danger",
+      title: "Storage limit reached",
+      message: "You have reached your storage limit. Delete or replace files to upload more."
+    });
+  } else if (usageRatio >= 0.85) {
+    notifications.push({
+      type: "storage-warning",
+      level: "warning",
+      title: "Storage almost full",
+      message: "Your account is using more than 85% of the available storage."
+    });
+  }
+
+  documents.forEach((document) => {
+    if (!document.expiryDate) {
+      return;
+    }
+
+    const expiryDate = new Date(document.expiryDate);
+    const diffDays = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      notifications.push({
+        type: "expired-document",
+        level: "danger",
+        documentId: document._id,
+        title: `${document.title} has expired`,
+        message: `${document.title} expired on ${expiryDate.toLocaleDateString("en-IN")}.`
+      });
+      return;
+    }
+
+    if (diffDays <= 30) {
+      notifications.push({
+        type: "expiring-document",
+        level: "warning",
+        documentId: document._id,
+        title: `${document.title} is expiring soon`,
+        message: `${document.title} will expire in ${diffDays} day${diffDays === 1 ? "" : "s"}.`
+      });
+    }
+  });
+
+  return notifications.slice(0, 8);
 }
 
 function getFileBucket() {
@@ -192,8 +303,16 @@ app.get("/health", (_req, res) => {
 
 app.post("/api/auth/signup", async (req, res) => {
   try {
-    const { fullName = "", email = "", password = "", confirmPassword = "" } = req.body;
+    const {
+      fullName = "",
+      email = "",
+      password = "",
+      confirmPassword = "",
+      recoveryEmail = "",
+      emailNotificationsEnabled
+    } = req.body;
     const normalizedEmail = normalizeEmail(email);
+    const normalizedRecoveryEmail = normalizeOptionalEmail(recoveryEmail);
 
     if (!fullName.trim()) {
       return res.status(400).json({ message: "Full name is required." });
@@ -211,6 +330,10 @@ app.post("/api/auth/signup", async (req, res) => {
       return res.status(400).json({ message: "Passwords do not match." });
     }
 
+    if (recoveryEmail && !normalizedRecoveryEmail) {
+      return res.status(400).json({ message: "Enter a valid recovery email address." });
+    }
+
     const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
@@ -219,7 +342,9 @@ app.post("/api/auth/signup", async (req, res) => {
 
     const user = new User({
       fullName: fullName.trim(),
-      email: normalizedEmail
+      email: normalizedEmail,
+      recoveryEmail: normalizedRecoveryEmail,
+      emailNotificationsEnabled: parseBoolean(emailNotificationsEnabled, true)
     });
 
     user.setPassword(password);
@@ -267,6 +392,7 @@ app.post("/api/auth/login", async (req, res) => {
     ];
 
     await user.save();
+    await syncUserStorageUsage(user);
 
     res.json({
       message: "Signed in successfully.",
@@ -356,9 +482,55 @@ app.post("/api/auth/reset-password", async (req, res) => {
 });
 
 app.get("/api/auth/me", requireAuth, async (req, res) => {
+  await syncUserStorageUsage(req.user);
   res.json({
     user: createUserPayload(req.user)
   });
+});
+
+app.put("/api/account", requireAuth, async (req, res) => {
+  try {
+    const { fullName = "", recoveryEmail = "", emailNotificationsEnabled } = req.body;
+    const normalizedRecoveryEmail = normalizeOptionalEmail(recoveryEmail);
+
+    if (recoveryEmail && !normalizedRecoveryEmail) {
+      return res.status(400).json({ message: "Enter a valid recovery email address." });
+    }
+
+    if (fullName.trim()) {
+      req.user.fullName = fullName.trim();
+    }
+
+    req.user.recoveryEmail = normalizedRecoveryEmail;
+    req.user.emailNotificationsEnabled = parseBoolean(
+      emailNotificationsEnabled,
+      req.user.emailNotificationsEnabled
+    );
+
+    await req.user.save();
+    await syncUserStorageUsage(req.user);
+
+    res.json({
+      message: "Account settings updated successfully.",
+      user: createUserPayload(req.user)
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to update account settings right now." });
+  }
+});
+
+app.get("/api/notifications", requireAuth, async (req, res) => {
+  try {
+    await syncUserStorageUsage(req.user);
+    const notifications = await buildNotificationsForUser(req.user);
+
+    res.json({
+      notifications,
+      unreadCount: notifications.length
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to fetch notifications right now." });
+  }
 });
 
 app.post("/api/auth/logout", requireAuth, async (req, res) => {
@@ -464,6 +636,15 @@ app.post("/api/documents", requireAuth, upload.single("file"), async (req, res) 
           .filter(Boolean)
       : [];
 
+    await syncUserStorageUsage(req.user);
+
+    const projectedStorageUsage = (req.user.storageUsedBytes || 0) + req.file.size;
+    if (projectedStorageUsage > (req.user.storageLimitBytes || DEFAULT_STORAGE_LIMIT_BYTES)) {
+      return res.status(400).json({
+        message: "Storage limit reached. Delete existing files or upload a smaller document."
+      });
+    }
+
     uploadedFileId = await uploadBufferToGridFs(req.file, req.user._id);
 
     const document = await Document.create({
@@ -478,6 +659,9 @@ app.post("/api/documents", requireAuth, upload.single("file"), async (req, res) 
       fileSize: req.file.size,
       gridFsFileId: uploadedFileId
     });
+
+    req.user.storageUsedBytes = projectedStorageUsage;
+    await req.user.save();
 
     res.status(201).json(document);
   } catch (error) {
@@ -517,6 +701,8 @@ app.put("/api/documents/:id", requireAuth, upload.single("file"), async (req, re
         }
       : null;
 
+    await syncUserStorageUsage(req.user);
+
     document.title = req.body.title || document.title;
     document.category = req.body.category || document.category;
     document.description = req.body.description || document.description;
@@ -524,6 +710,15 @@ app.put("/api/documents/:id", requireAuth, upload.single("file"), async (req, re
     document.tags = tags;
 
     if (req.file) {
+      const projectedStorageUsage =
+        (req.user.storageUsedBytes || 0) - (document.fileSize || 0) + req.file.size;
+
+      if (projectedStorageUsage > (req.user.storageLimitBytes || DEFAULT_STORAGE_LIMIT_BYTES)) {
+        return res.status(400).json({
+          message: "Storage limit reached. Delete existing files or upload a smaller document."
+        });
+      }
+
       uploadedFileId = await uploadBufferToGridFs(req.file, req.user._id);
       document.fileName = req.file.originalname;
       document.fileType = req.file.mimetype;
@@ -531,9 +726,12 @@ app.put("/api/documents/:id", requireAuth, upload.single("file"), async (req, re
       document.gridFsFileId = uploadedFileId;
       document.filePath = null;
       document.storedFileName = null;
+
+      req.user.storageUsedBytes = projectedStorageUsage;
     }
 
     await document.save();
+    await req.user.save();
 
     if (previousStoredFile) {
       await deleteStoredFile(previousStoredFile).catch((cleanupError) => {
@@ -565,6 +763,11 @@ app.delete("/api/documents/:id", requireAuth, async (req, res) => {
 
     await deleteStoredFile(document);
     await document.deleteOne();
+    req.user.storageUsedBytes = Math.max(
+      0,
+      (req.user.storageUsedBytes || 0) - (document.fileSize || 0)
+    );
+    await req.user.save();
 
     res.json({ message: "Document deleted successfully." });
   } catch (error) {

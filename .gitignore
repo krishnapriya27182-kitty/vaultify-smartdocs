@@ -8,3 +8,4 @@ pnpm-debug.log*
 *.log
 uploads/*
 !uploads/.gitkeep
+.ftp-deploy-sync-state.json

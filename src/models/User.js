@@ -52,6 +52,24 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true
     },
+    recoveryEmail: {
+      type: String,
+      default: "",
+      lowercase: true,
+      trim: true
+    },
+    emailNotificationsEnabled: {
+      type: Boolean,
+      default: true
+    },
+    storageLimitBytes: {
+      type: Number,
+      default: 30 * 1024 * 1024
+    },
+    storageUsedBytes: {
+      type: Number,
+      default: 0
+    },
     passwordHash: {
       type: String,
       required: true

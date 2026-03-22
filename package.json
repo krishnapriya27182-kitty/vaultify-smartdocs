@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "lint": "eslint . --ext .js",
+    "test": "node tests/run-tests.js",
+    "check": "npm run lint && npm test"
   },
   "keywords": [
     "documents",
@@ -21,6 +24,7 @@
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
     "nodemon": "^3.1.9"
   }
 }
