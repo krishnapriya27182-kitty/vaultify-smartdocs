@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vaultify SmartDocs | Account Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell app-shell">
+      <div id="globalMessage" class="message floating hidden"></div>
+
+      <div class="app-layout">
+        <aside class="app-sidebar">
+          <div class="sidebar-brand">
+            <div class="brand-mark">V</div>
+            <div>
+              <strong>Vaultify</strong>
+              <p>SmartDocs</p>
+            </div>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a class="sidebar-link" href="/dashboard.html">Dashboard</a>
+            <a class="sidebar-link" href="/dashboard.html">All Documents</a>
+            <a class="sidebar-link" href="/dashboard.html">Smart Alerts</a>
+            <a class="sidebar-link active" href="/settings.html">Account Settings</a>
+          </nav>
+
+          <a class="sidebar-upload" href="/dashboard.html">Go To Vault</a>
+
+          <button id="logoutBtn" class="ghost sidebar-logout" type="button">
+            Logout
+          </button>
+
+          <div class="sidebar-meta">
+            <p>Support</p>
+            <p>Protected Vault Experience</p>
+          </div>
+        </aside>
+
+        <div class="app-content">
+          <header class="settings-header">
+            <div>
+              <p class="eyebrow">Account Settings</p>
+              <h1>Manage your protected vault profile and preferences.</h1>
+              <p class="hero-copy">
+                Update your personal details, recovery options, notification
+                preferences, and storage overview from one secure space.
+              </p>
+            </div>
+
+            <div class="user-chip settings-chip">
+              <span id="settingsInitials" class="user-initials">VU</span>
+              <div>
+                <strong id="settingsDisplayName">Vaultify User</strong>
+                <p id="settingsDisplayEmail">user@example.com</p>
+              </div>
+            </div>
+          </header>
+
+          <div class="settings-grid">
+            <section class="panel settings-main-card">
+              <div class="panel-heading">
+                <h2>Profile Details</h2>
+              </div>
+
+              <form id="settingsForm" class="settings-form-grid">
+                <label>
+                  Full Name
+                  <input type="text" id="settingsFullName" name="fullName" />
+                </label>
+
+                <label>
+                  Email Address
+                  <input
+                    type="email"
+                    id="settingsEmail"
+                    name="email"
+                    class="readonly-field"
+                    readonly
+                  />
+                </label>
+
+                <label class="full-span">
+                  Recovery Email
+                  <input
+                    type="email"
+                    id="settingsRecoveryEmail"
+                    name="recoveryEmail"
+                    placeholder="Optional backup email"
+                  />
+                </label>
+
+                <label class="checkbox-row soft-checkbox full-span">
+                  <input
+                    type="checkbox"
+                    id="settingsEmailNotifications"
+                    name="emailNotificationsEnabled"
+                  />
+                  Send expiry reminder emails
+                </label>
+
+                <div class="settings-actions-row full-span">
+                  <button id="changePasswordBtn" class="ghost" type="button">
+                    Change Password
+                  </button>
+                  <button class="primary" type="submit">Save Changes</button>
+                </div>
+              </form>
+            </section>
+
+            <aside class="settings-side-column">
+              <section class="panel storage-panel">
+                <div class="panel-heading">
+                  <h2>Storage Usage</h2>
+                </div>
+
+                <div class="storage-panel-copy">
+                  <strong id="settingsStorageUsed">0 MB</strong>
+                  <span id="settingsStorageLimit">of 0 MB</span>
+                </div>
+
+                <div class="progress-bar large-progress">
+                  <span id="settingsStorageBar"></span>
+                </div>
+
+                <p class="hero-copy compact-copy">
+                  Keep an eye on available space before uploading more files.
+                </p>
+              </section>
+
+              <section class="panel security-panel">
+                <div class="panel-heading">
+                  <h2>Security</h2>
+                </div>
+
+                <div class="security-item">
+                  <strong>Password Reset</strong>
+                  <p>Use the secure forgot-password flow whenever you need to update your password.</p>
+                </div>
+
+                <div class="security-item">
+                  <strong>Notification Preference</strong>
+                  <p>Expiry reminders stay linked to your account preferences and recovery setup.</p>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="common.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>

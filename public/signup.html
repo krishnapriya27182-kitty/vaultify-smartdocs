@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vaultify SmartDocs | Sign Up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div id="globalMessage" class="message floating hidden"></div>
+
+      <section class="auth-layout signup-mode">
+        <div class="auth-copy">
+          <div class="sidebar-brand auth-brand-left">
+            <div class="brand-mark">V</div>
+            <div>
+              <strong>Vaultify SmartDocs</strong>
+              <p>Protected Digital Vault</p>
+            </div>
+          </div>
+
+          <h1>Your own secure document vault starts with your own account.</h1>
+          <p class="hero-copy">
+            Each user gets a personal sign-in, private storage space, and a
+            protected dashboard for viewing only their own important documents.
+          </p>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Private Access</h3>
+              <p>Documents are linked to the signed-in user only.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Password Security</h3>
+              <p>Each account uses its own email and password for safe login.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Smart Alerts</h3>
+              <p>Get expiry reminders and storage awareness in one place.</p>
+            </article>
+          </div>
+        </div>
+
+        <section class="panel auth-card signup-card">
+          <form id="signupForm" class="auth-form">
+            <h2>Create Account</h2>
+            <p class="hero-copy compact-copy">
+              Begin your secure document journey with your own protected vault.
+            </p>
+
+            <label>
+              Full Name
+              <input type="text" id="signupName" name="fullName" required />
+            </label>
+
+            <label>
+              Email Address
+              <input type="email" id="signupEmail" name="email" required />
+            </label>
+
+            <label>
+              Recovery Email
+              <input
+                type="email"
+                id="signupRecoveryEmail"
+                name="recoveryEmail"
+                placeholder="Optional backup email"
+              />
+            </label>
+
+            <div class="split-inputs">
+              <label>
+                Password
+                <input
+                  type="password"
+                  id="signupPassword"
+                  name="password"
+                  required
+                  minlength="8"
+                />
+              </label>
+
+              <label>
+                Confirm Password
+                <input
+                  type="password"
+                  id="signupConfirmPassword"
+                  name="confirmPassword"
+                  required
+                  minlength="8"
+                />
+              </label>
+            </div>
+
+            <label class="checkbox-row soft-checkbox">
+              <input
+                type="checkbox"
+                id="signupEmailNotifications"
+                name="emailNotificationsEnabled"
+                checked
+              />
+              Send me expiry reminder alerts
+            </label>
+
+            <button class="primary" type="submit">Create Account</button>
+          </form>
+
+          <p class="auth-page-link">
+            Already have a secure vault?
+            <a href="/">Sign in here</a>
+          </p>
+        </section>
+      </section>
+    </div>
+
+    <script src="common.js"></script>
+    <script src="signup.js"></script>
+  </body>
+</html>
