@@ -22,6 +22,7 @@ const settingsFullName = document.getElementById("settingsFullName");
 const settingsRecoveryEmail = document.getElementById("settingsRecoveryEmail");
 const settingsEmailNotifications = document.getElementById("settingsEmailNotifications");
 
+const documentFormPanel = document.getElementById("documentFormPanel");
 const documentForm = document.getElementById("documentForm");
 const documentsGrid = document.getElementById("documentsGrid");
 const formTitle = document.getElementById("formTitle");
@@ -37,6 +38,7 @@ const notificationsPanel = document.getElementById("notificationsPanel");
 const notificationCount = document.getElementById("notificationCount");
 const notificationsList = document.getElementById("notificationsList");
 
+const quickPreviewPanel = document.getElementById("quickPreviewPanel");
 const previewStatus = document.getElementById("previewStatus");
 const previewEmptyState = document.getElementById("previewEmptyState");
 const previewDetails = document.getElementById("previewDetails");
@@ -360,6 +362,28 @@ function renderPreview(documentData) {
   previewDetails.classList.remove("hidden");
 }
 
+function highlightPanel(panelElement) {
+  if (!panelElement) {
+    return;
+  }
+
+  panelElement.classList.remove("panel-focus");
+  void panelElement.offsetWidth;
+  panelElement.classList.add("panel-focus");
+}
+
+function scrollToPanel(panelElement) {
+  if (!panelElement) {
+    return;
+  }
+
+  panelElement.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+  highlightPanel(panelElement);
+}
+
 function openConfirmModal(documentData) {
   state.pendingDeleteId = documentData._id;
   confirmMessage.textContent = `Are you sure you want to delete "${documentData.title}"? This action cannot be undone.`;
@@ -613,7 +637,10 @@ function handleEditDocument(id) {
 
   renderPreview(documentData);
   populateDocumentForm(documentData);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollToPanel(documentFormPanel);
+  window.setTimeout(() => {
+    document.getElementById("title").focus();
+  }, 350);
 }
 
 function handlePreviewDocument(id) {
@@ -625,6 +652,7 @@ function handlePreviewDocument(id) {
   }
 
   renderPreview(documentData);
+  scrollToPanel(quickPreviewPanel);
 }
 
 async function handleDeleteDocument(id) {
