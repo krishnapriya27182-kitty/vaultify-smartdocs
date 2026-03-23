@@ -1,32 +1,32 @@
 window.Vaultify = (() => {
   const TOKEN_KEY = "vaultifyToken";
   const USER_KEY = "vaultifyUser";
+  const STATUS_LABELS = {
+    active: "Safe",
+    "expiring-soon": "Expiring Soon",
+    expired: "Expired",
+    "no-expiry": "No Expiry"
+  };
 
-  function readStoredUser() {
+  function readJson(key) {
     try {
-      return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+      return JSON.parse(localStorage.getItem(key) || "null");
     } catch (_error) {
       return null;
     }
   }
 
-  function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || "";
-  }
-
-  function getUser() {
-    return readStoredUser();
-  }
-
-  function setSession(token, user) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
-
-  function clearSession() {
+  const getToken = () => localStorage.getItem(TOKEN_KEY) || "";
+  const getUser = () => readJson(USER_KEY);
+  const setStoredUser = (user) => localStorage.setItem(USER_KEY, JSON.stringify(user));
+  const clearSession = () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-  }
+  };
+  const setSession = (token, user) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    setStoredUser(user);
+  };
 
   function showMessage(message, type = "success") {
     const globalMessage = document.getElementById("globalMessage");
@@ -43,6 +43,22 @@ window.Vaultify = (() => {
     showMessage.timeoutId = window.setTimeout(() => {
       globalMessage.classList.add("hidden");
     }, 3500);
+  }
+
+  function formatSize(size, emptyLabel = "0 MB") {
+    if (!size) {
+      return emptyLabel;
+    }
+
+    if (size < 1024) {
+      return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   function formatDate(dateString) {
@@ -62,8 +78,10 @@ window.Vaultify = (() => {
       return "Just now";
     }
 
-    const diffMs = Date.now() - new Date(dateString).getTime();
-    const diffMinutes = Math.max(Math.round(diffMs / (1000 * 60)), 0);
+    const diffMinutes = Math.max(
+      Math.round((Date.now() - new Date(dateString).getTime()) / (1000 * 60)),
+      0
+    );
 
     if (diffMinutes < 1) {
       return "Just now";
@@ -79,35 +97,9 @@ window.Vaultify = (() => {
     }
 
     const diffDays = Math.round(diffHours / 24);
-    if (diffDays < 7) {
-      return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-    }
-
-    return formatDate(dateString);
-  }
-
-  function formatFileSize(size) {
-    if (size < 1024) {
-      return `${size} B`;
-    }
-
-    if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  function formatBytes(size) {
-    if (!size) {
-      return "0 MB";
-    }
-
-    if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    return diffDays < 7
+      ? `${diffDays} day${diffDays === 1 ? "" : "s"} ago`
+      : formatDate(dateString);
   }
 
   function escapeHtml(value = "") {
@@ -120,14 +112,7 @@ window.Vaultify = (() => {
   }
 
   function getStatusLabel(status) {
-    const labels = {
-      active: "Safe",
-      "expiring-soon": "Expiring Soon",
-      expired: "Expired",
-      "no-expiry": "No Expiry"
-    };
-
-    return labels[status] || "Unknown";
+    return STATUS_LABELS[status] || "Unknown";
   }
 
   function redirectIfAuthenticated(path = "/dashboard.html") {
@@ -206,6 +191,8 @@ window.Vaultify = (() => {
       .toUpperCase();
   }
 
+  const setText = (element, value) => element && (element.textContent = value);
+
   function attachScrollButtons(selector = "[data-scroll-target]") {
     document.querySelectorAll(selector).forEach((trigger) => {
       trigger.addEventListener("click", (event) => {
@@ -229,18 +216,19 @@ window.Vaultify = (() => {
     attachScrollButtons,
     clearSession,
     escapeHtml,
-    formatBytes,
+    formatBytes: (size) => formatSize(size, "0 MB"),
     formatDate,
-    formatFileSize,
+    formatFileSize: (size) => formatSize(size),
     formatRelativeTime,
     getInitials,
     getStatusLabel,
     getToken,
     getUser,
-    readStoredUser,
     redirectIfAuthenticated,
     requireAuth,
     setSession,
+    setStoredUser,
+    setText,
     showMessage
   };
 })();

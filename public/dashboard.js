@@ -5,50 +5,23 @@ const Vaultify = window.Vaultify;
     return;
   }
 
-  const totalDocs = document.getElementById("totalDocs");
-  const expiringDocs = document.getElementById("expiringDocs");
-  const categoryCount = document.getElementById("categoryCount");
-  const storageUsage = document.getElementById("storageUsage");
-  const storageUsageBar = document.getElementById("storageUsageBar");
-  const welcomeHeading = document.getElementById("welcomeHeading");
-  const userName = document.getElementById("userName");
-  const userEmail = document.getElementById("userEmail");
-  const userInitials = document.getElementById("userInitials");
-  const notificationsPanel = document.getElementById("notificationsPanel");
-  const notificationCount = document.getElementById("notificationCount");
-  const notificationsList = document.getElementById("notificationsList");
-  const documentsGrid = document.getElementById("documentsGrid");
-  const documentForm = document.getElementById("documentForm");
-  const formTitle = document.getElementById("formTitle");
-  const submitBtn = document.getElementById("submitBtn");
-  const cancelEditBtn = document.getElementById("cancelEditBtn");
-  const quickPreviewPanel = document.getElementById("quickPreviewPanel");
-  const previewStatus = document.getElementById("previewStatus");
-  const previewEmptyState = document.getElementById("previewEmptyState");
-  const previewDetails = document.getElementById("previewDetails");
-  const previewCategory = document.getElementById("previewCategory");
-  const previewTitle = document.getElementById("previewTitle");
-  const previewFileName = document.getElementById("previewFileName");
-  const previewUploadDate = document.getElementById("previewUploadDate");
-  const previewExpiryDate = document.getElementById("previewExpiryDate");
-  const previewLastUpdated = document.getElementById("previewLastUpdated");
-  const previewDescription = document.getElementById("previewDescription");
-  const previewTags = document.getElementById("previewTags");
-  const previewOpenBtn = document.getElementById("previewOpenBtn");
-  const previewEditBtn = document.getElementById("previewEditBtn");
-  const confirmModal = document.getElementById("confirmModal");
-  const confirmMessage = document.getElementById("confirmMessage");
-  const closeConfirmBtn = document.getElementById("closeConfirmBtn");
-  const cancelConfirmBtn = document.getElementById("cancelConfirmBtn");
-  const confirmActionBtn = document.getElementById("confirmActionBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const documentFormPanel = document.getElementById("documentFormPanel");
-
+  const $ = (id) => document.getElementById(id);
+  const ids = `
+    totalDocs expiringDocs categoryCount storageUsage storageUsageBar welcomeHeading
+    userName userEmail userInitials notificationsPanel notificationCount notificationsList
+    documentsGrid documentForm formTitle submitBtn cancelEditBtn quickPreviewPanel
+    previewStatus previewEmptyState previewDetails previewCategory previewTitle previewFileName
+    previewUploadDate previewExpiryDate previewLastUpdated previewDescription previewTags
+    previewOpenBtn previewEditBtn confirmModal confirmMessage closeConfirmBtn cancelConfirmBtn
+    confirmActionBtn logoutBtn documentFormPanel searchInput categoryFilter statusFilter
+    sortFilter documentId file title category description expiryDate tags
+  `.trim().split(/\s+/);
+  const elements = Object.fromEntries(ids.map((id) => [id, $(id)]));
   const filters = {
-    searchInput: document.getElementById("searchInput"),
-    categoryFilter: document.getElementById("categoryFilter"),
-    statusFilter: document.getElementById("statusFilter"),
-    sortFilter: document.getElementById("sortFilter")
+    searchInput: elements.searchInput,
+    categoryFilter: elements.categoryFilter,
+    statusFilter: elements.statusFilter,
+    sortFilter: elements.sortFilter
   };
 
   const state = {
@@ -59,19 +32,35 @@ const Vaultify = window.Vaultify;
     pendingDeleteId: ""
   };
 
+  function findDocument(id) {
+    return state.currentDocuments.find((documentData) => documentData._id === id);
+  }
+
+  function setStorageBar(bar, usagePercent, colors) {
+    bar.style.width = `${usagePercent}%`;
+    bar.style.background =
+      usagePercent >= 100
+        ? colors.danger
+        : usagePercent >= 85
+          ? colors.warning
+          : colors.safe;
+  }
+
   function renderStorageUsage() {
-    const usedBytes = state.currentUser ? state.currentUser.storageUsedBytes || 0 : 0;
-    const limitBytes = state.currentUser ? state.currentUser.storageLimitBytes || 0 : 0;
+    const usedBytes = state.currentUser?.storageUsedBytes || 0;
+    const limitBytes = state.currentUser?.storageLimitBytes || 0;
     const usagePercent = limitBytes ? Math.min((usedBytes / limitBytes) * 100, 100) : 0;
 
-    storageUsage.textContent = `${Vaultify.formatBytes(usedBytes)} / ${Vaultify.formatBytes(limitBytes)}`;
-    storageUsageBar.style.width = `${usagePercent}%`;
-    storageUsageBar.style.background =
-      usagePercent >= 100
-        ? "linear-gradient(135deg, #b42318, #dc5a4d)"
-        : usagePercent >= 85
-          ? "linear-gradient(135deg, #b54708, #e0a11b)"
-          : "linear-gradient(135deg, #143722, #28573b)";
+    Vaultify.setText(
+      elements.storageUsage,
+      `${Vaultify.formatBytes(usedBytes)} / ${Vaultify.formatBytes(limitBytes)}`
+    );
+
+    setStorageBar(elements.storageUsageBar, usagePercent, {
+      danger: "linear-gradient(135deg, #b42318, #dc5a4d)",
+      warning: "linear-gradient(135deg, #b54708, #e0a11b)",
+      safe: "linear-gradient(135deg, #143722, #28573b)"
+    });
   }
 
   function renderCurrentUser() {
@@ -79,20 +68,21 @@ const Vaultify = window.Vaultify;
       return;
     }
 
-    userName.textContent = state.currentUser.fullName;
-    userEmail.textContent = state.currentUser.email;
-    userInitials.textContent = Vaultify.getInitials(state.currentUser.fullName) || "VU";
-    welcomeHeading.textContent = `Welcome, ${state.currentUser.fullName}`;
+    const { fullName, email } = state.currentUser;
+    Vaultify.setText(elements.userName, fullName);
+    Vaultify.setText(elements.userEmail, email);
+    Vaultify.setText(elements.userInitials, Vaultify.getInitials(fullName) || "VU");
+    Vaultify.setText(elements.welcomeHeading, `Welcome, ${fullName}`);
     renderStorageUsage();
   }
 
   function renderNotifications(notifications) {
     state.currentNotifications = notifications;
-    notificationCount.textContent = String(notifications.length);
-    notificationsPanel.classList.remove("hidden");
+    Vaultify.setText(elements.notificationCount, String(notifications.length));
+    elements.notificationsPanel.classList.remove("hidden");
 
     if (!notifications.length) {
-      notificationsList.innerHTML = `
+      elements.notificationsList.innerHTML = `
         <article class="notification-item notification-info">
           <h3>No urgent alerts</h3>
           <p>Your vault looks healthy right now. Expiry and storage reminders will appear here.</p>
@@ -101,7 +91,7 @@ const Vaultify = window.Vaultify;
       return;
     }
 
-    notificationsList.innerHTML = notifications
+    elements.notificationsList.innerHTML = notifications
       .map(
         (notification) => `
           <article class="notification-item notification-${Vaultify.escapeHtml(notification.level || "info")}">
@@ -114,35 +104,31 @@ const Vaultify = window.Vaultify;
   }
 
   function getSortedDocuments(documents) {
-    const selectedSort = filters.sortFilter.value;
     const sortedDocuments = [...documents];
 
     sortedDocuments.sort((firstDocument, secondDocument) => {
-      if (selectedSort === "name") {
-        return firstDocument.title.localeCompare(secondDocument.title);
+      switch (filters.sortFilter.value) {
+        case "name":
+          return firstDocument.title.localeCompare(secondDocument.title);
+        case "expiry":
+          if (!firstDocument.expiryDate && !secondDocument.expiryDate) {
+            return 0;
+          }
+
+          if (!firstDocument.expiryDate) {
+            return 1;
+          }
+
+          if (!secondDocument.expiryDate) {
+            return -1;
+          }
+
+          return new Date(firstDocument.expiryDate) - new Date(secondDocument.expiryDate);
+        case "updated":
+          return new Date(secondDocument.updatedAt) - new Date(firstDocument.updatedAt);
+        default:
+          return new Date(secondDocument.createdAt) - new Date(firstDocument.createdAt);
       }
-
-      if (selectedSort === "expiry") {
-        if (!firstDocument.expiryDate && !secondDocument.expiryDate) {
-          return 0;
-        }
-
-        if (!firstDocument.expiryDate) {
-          return 1;
-        }
-
-        if (!secondDocument.expiryDate) {
-          return -1;
-        }
-
-        return new Date(firstDocument.expiryDate) - new Date(secondDocument.expiryDate);
-      }
-
-      if (selectedSort === "updated") {
-        return new Date(secondDocument.updatedAt) - new Date(firstDocument.updatedAt);
-      }
-
-      return new Date(secondDocument.createdAt) - new Date(firstDocument.createdAt);
     });
 
     return sortedDocuments;
@@ -153,15 +139,15 @@ const Vaultify = window.Vaultify;
       return null;
     }
 
-    return documents.find((documentData) => documentData._id === state.selectedDocumentId) || documents[0];
+    return findDocument(state.selectedDocumentId) || documents[0];
   }
 
   function resetPreviewPanel() {
     state.selectedDocumentId = "";
-    previewStatus.className = "status-pill status-no-expiry";
-    previewStatus.textContent = "No Selection";
-    previewEmptyState.classList.remove("hidden");
-    previewDetails.classList.add("hidden");
+    elements.previewStatus.className = "status-pill status-no-expiry";
+    Vaultify.setText(elements.previewStatus, "No Selection");
+    elements.previewEmptyState.classList.remove("hidden");
+    elements.previewDetails.classList.add("hidden");
   }
 
   function renderPreview(documentData) {
@@ -171,21 +157,22 @@ const Vaultify = window.Vaultify;
     }
 
     state.selectedDocumentId = documentData._id;
-    previewStatus.className = `status-pill status-${documentData.expiryStatus}`;
-    previewStatus.textContent = Vaultify.getStatusLabel(documentData.expiryStatus);
-    previewCategory.textContent = documentData.category;
-    previewTitle.textContent = documentData.title;
-    previewFileName.textContent = documentData.fileName;
-    previewUploadDate.textContent = Vaultify.formatDate(documentData.createdAt);
-    previewExpiryDate.textContent = Vaultify.formatDate(documentData.expiryDate);
-    previewLastUpdated.textContent = Vaultify.formatRelativeTime(documentData.updatedAt);
-    previewDescription.textContent = documentData.description || "No notes added.";
-    previewTags.textContent = documentData.tags && documentData.tags.length
-      ? documentData.tags.join(", ")
-      : "No tags";
+    elements.previewStatus.className = `status-pill status-${documentData.expiryStatus}`;
 
-    previewEmptyState.classList.add("hidden");
-    previewDetails.classList.remove("hidden");
+    [
+      ["previewStatus", Vaultify.getStatusLabel(documentData.expiryStatus)],
+      ["previewCategory", documentData.category],
+      ["previewTitle", documentData.title],
+      ["previewFileName", documentData.fileName],
+      ["previewUploadDate", Vaultify.formatDate(documentData.createdAt)],
+      ["previewExpiryDate", Vaultify.formatDate(documentData.expiryDate)],
+      ["previewLastUpdated", Vaultify.formatRelativeTime(documentData.updatedAt)],
+      ["previewDescription", documentData.description || "No notes added."],
+      ["previewTags", documentData.tags?.length ? documentData.tags.join(", ") : "No tags"]
+    ].forEach(([key, value]) => Vaultify.setText(elements[key], value));
+
+    elements.previewEmptyState.classList.add("hidden");
+    elements.previewDetails.classList.remove("hidden");
   }
 
   function highlightPanel(panelElement) {
@@ -203,110 +190,115 @@ const Vaultify = window.Vaultify;
   }
 
   function resetDocumentForm() {
-    documentForm.reset();
-    document.getElementById("documentId").value = "";
-    document.getElementById("file").required = true;
-    formTitle.textContent = "Add New Document";
-    submitBtn.textContent = "Save Document";
-    cancelEditBtn.classList.add("hidden");
+    elements.documentForm.reset();
+    elements.documentId.value = "";
+    elements.file.required = true;
+    Vaultify.setText(elements.formTitle, "Add New Document");
+    Vaultify.setText(elements.submitBtn, "Save Document");
+    elements.cancelEditBtn.classList.add("hidden");
   }
 
   function populateDocumentForm(documentData) {
-    document.getElementById("documentId").value = documentData._id;
-    document.getElementById("title").value = documentData.title;
-    document.getElementById("category").value = documentData.category;
-    document.getElementById("description").value = documentData.description || "";
-    document.getElementById("expiryDate").value = documentData.expiryDate
+    elements.documentId.value = documentData._id;
+    elements.title.value = documentData.title;
+    elements.category.value = documentData.category;
+    elements.description.value = documentData.description || "";
+    elements.expiryDate.value = documentData.expiryDate
       ? new Date(documentData.expiryDate).toISOString().split("T")[0]
       : "";
-    document.getElementById("tags").value = (documentData.tags || []).join(", ");
-    document.getElementById("file").required = false;
-    formTitle.textContent = "Edit Document";
-    submitBtn.textContent = "Update Document";
-    cancelEditBtn.classList.remove("hidden");
+    elements.tags.value = (documentData.tags || []).join(", ");
+    elements.file.required = false;
+    Vaultify.setText(elements.formTitle, "Edit Document");
+    Vaultify.setText(elements.submitBtn, "Update Document");
+    elements.cancelEditBtn.classList.remove("hidden");
+  }
+
+  function renderDocumentCard(documentData, selectedDocumentId) {
+    const isSelected = documentData._id === selectedDocumentId;
+    const tags = documentData.tags?.length
+      ? documentData.tags.map((tag) => Vaultify.escapeHtml(tag)).join(", ")
+      : "No tags";
+
+    return `
+      <article class="document-card card-${documentData.expiryStatus} ${isSelected ? "is-selected" : ""}" data-preview-id="${documentData._id}">
+        <div class="document-header">
+          <div>
+            <p class="document-category">${Vaultify.escapeHtml(documentData.category)}</p>
+            <h3 class="document-title">${Vaultify.escapeHtml(documentData.title)}</h3>
+          </div>
+          <span class="status-pill status-${documentData.expiryStatus}">
+            ${Vaultify.getStatusLabel(documentData.expiryStatus)}
+          </span>
+        </div>
+
+        <div class="document-meta">
+          <strong>File:</strong> ${Vaultify.escapeHtml(documentData.fileName)}<br />
+          <strong>Size:</strong> ${Vaultify.formatFileSize(documentData.fileSize)}<br />
+          <strong>Expiry:</strong> ${Vaultify.formatDate(documentData.expiryDate)}
+        </div>
+
+        <div class="document-meta">
+          ${Vaultify.escapeHtml(documentData.description || "No description added.")}
+        </div>
+
+        <div class="document-tags">
+          <strong>Tags:</strong> ${tags}
+        </div>
+
+        <div class="document-footnote">
+          Last updated: ${Vaultify.escapeHtml(Vaultify.formatRelativeTime(documentData.updatedAt))}
+        </div>
+
+        <div class="document-actions">
+          <button class="ghost" type="button" data-action="preview" data-id="${documentData._id}">
+            Quick Preview
+          </button>
+          <button class="ghost" type="button" data-action="open" data-id="${documentData._id}">
+            View File
+          </button>
+          <button class="ghost" type="button" data-action="edit" data-id="${documentData._id}">
+            Edit
+          </button>
+          <button class="danger-btn" type="button" data-action="delete" data-id="${documentData._id}">
+            Delete
+          </button>
+        </div>
+      </article>
+    `;
   }
 
   function renderDocuments(documents) {
     const sortedDocuments = getSortedDocuments(documents);
-    const uniqueCategories = new Set(sortedDocuments.map((documentData) => documentData.category));
+    const selectedDocument = getSelectedDocument(sortedDocuments);
+    const selectedDocumentId = selectedDocument?._id || "";
 
-    totalDocs.textContent = sortedDocuments.length;
-    expiringDocs.textContent = sortedDocuments.filter(
-      (documentData) => documentData.expiryStatus === "expiring-soon"
-    ).length;
-    categoryCount.textContent = uniqueCategories.size;
+    Vaultify.setText(elements.totalDocs, sortedDocuments.length);
+    Vaultify.setText(
+      elements.expiringDocs,
+      sortedDocuments.filter((documentData) => documentData.expiryStatus === "expiring-soon").length
+    );
+    Vaultify.setText(
+      elements.categoryCount,
+      new Set(sortedDocuments.map((documentData) => documentData.category)).size
+    );
 
     if (!sortedDocuments.length) {
-      documentsGrid.innerHTML =
+      elements.documentsGrid.innerHTML =
         '<div class="empty-state">No documents found in your private vault yet. Upload one to get started.</div>';
       resetPreviewPanel();
       return;
     }
 
-    const selectedDocument = getSelectedDocument(sortedDocuments);
     renderPreview(selectedDocument);
-
-    documentsGrid.innerHTML = sortedDocuments
-      .map((documentData) => {
-        const tags = documentData.tags && documentData.tags.length
-          ? documentData.tags.map((tag) => Vaultify.escapeHtml(tag)).join(", ")
-          : "No tags";
-        const isSelected = selectedDocument && selectedDocument._id === documentData._id;
-
-        return `
-          <article class="document-card card-${documentData.expiryStatus} ${isSelected ? "is-selected" : ""}" data-preview-id="${documentData._id}">
-            <div class="document-header">
-              <div>
-                <p class="document-category">${Vaultify.escapeHtml(documentData.category)}</p>
-                <h3 class="document-title">${Vaultify.escapeHtml(documentData.title)}</h3>
-              </div>
-              <span class="status-pill status-${documentData.expiryStatus}">
-                ${Vaultify.getStatusLabel(documentData.expiryStatus)}
-              </span>
-            </div>
-
-            <div class="document-meta">
-              <strong>File:</strong> ${Vaultify.escapeHtml(documentData.fileName)}<br />
-              <strong>Size:</strong> ${Vaultify.formatFileSize(documentData.fileSize)}<br />
-              <strong>Expiry:</strong> ${Vaultify.formatDate(documentData.expiryDate)}
-            </div>
-
-            <div class="document-meta">
-              ${Vaultify.escapeHtml(documentData.description || "No description added.")}
-            </div>
-
-            <div class="document-tags">
-              <strong>Tags:</strong> ${tags}
-            </div>
-
-            <div class="document-footnote">
-              Last updated: ${Vaultify.escapeHtml(Vaultify.formatRelativeTime(documentData.updatedAt))}
-            </div>
-
-            <div class="document-actions">
-              <button class="ghost" type="button" data-action="preview" data-id="${documentData._id}">
-                Quick Preview
-              </button>
-              <button class="ghost" type="button" data-action="open" data-id="${documentData._id}">
-                View File
-              </button>
-              <button class="ghost" type="button" data-action="edit" data-id="${documentData._id}">
-                Edit
-              </button>
-              <button class="danger-btn" type="button" data-action="delete" data-id="${documentData._id}">
-                Delete
-              </button>
-            </div>
-          </article>
-        `;
-      })
+    elements.documentsGrid.innerHTML = sortedDocuments
+      .map((documentData) => renderDocumentCard(documentData, selectedDocumentId))
       .join("");
   }
 
   async function refreshCurrentUser() {
     const payload = await Vaultify.apiFetch("/api/auth/me");
     state.currentUser = payload.user;
-    localStorage.setItem("vaultifyUser", JSON.stringify(payload.user));
+    Vaultify.setStoredUser(payload.user);
     renderCurrentUser();
   }
 
@@ -322,9 +314,8 @@ const Vaultify = window.Vaultify;
       status: filters.statusFilter.value
     });
 
-    const documents = await Vaultify.apiFetch(`/api/documents?${params.toString()}`);
-    state.currentDocuments = documents;
-    renderDocuments(documents);
+    state.currentDocuments = await Vaultify.apiFetch(`/api/documents?${params.toString()}`);
+    renderDocuments(state.currentDocuments);
   }
 
   async function loadDashboardData() {
@@ -357,8 +348,8 @@ const Vaultify = window.Vaultify;
     }
   }
 
-  function handleEditDocument(id) {
-    const documentData = state.currentDocuments.find((item) => item._id === id);
+  function startEditing(id) {
+    const documentData = findDocument(id);
 
     if (!documentData) {
       Vaultify.showMessage("Unable to load document details.", "error");
@@ -367,14 +358,12 @@ const Vaultify = window.Vaultify;
 
     renderPreview(documentData);
     populateDocumentForm(documentData);
-    scrollToPanel(documentFormPanel);
-    window.setTimeout(() => {
-      document.getElementById("title").focus();
-    }, 350);
+    scrollToPanel(elements.documentFormPanel);
+    window.setTimeout(() => elements.title.focus(), 350);
   }
 
-  function handlePreviewDocument(id) {
-    const documentData = state.currentDocuments.find((item) => item._id === id);
+  function showPreview(id) {
+    const documentData = findDocument(id);
 
     if (!documentData) {
       Vaultify.showMessage("Unable to load document preview.", "error");
@@ -382,29 +371,28 @@ const Vaultify = window.Vaultify;
     }
 
     renderPreview(documentData);
-    scrollToPanel(quickPreviewPanel);
+    scrollToPanel(elements.quickPreviewPanel);
   }
 
-  function openConfirmModal(documentData) {
-    state.pendingDeleteId = documentData._id;
-    confirmMessage.textContent = `Are you sure you want to delete "${documentData.title}"? This action cannot be undone.`;
-    confirmModal.classList.remove("hidden");
-  }
-
-  function closeConfirmModal() {
-    state.pendingDeleteId = "";
-    confirmModal.classList.add("hidden");
-  }
-
-  function handleDeleteDocument(id) {
-    const documentData = state.currentDocuments.find((item) => item._id === id);
+  function openDeleteModal(id) {
+    const documentData = findDocument(id);
 
     if (!documentData) {
       Vaultify.showMessage("Unable to load document details.", "error");
       return;
     }
 
-    openConfirmModal(documentData);
+    state.pendingDeleteId = documentData._id;
+    Vaultify.setText(
+      elements.confirmMessage,
+      `Are you sure you want to delete "${documentData.title}"? This action cannot be undone.`
+    );
+    elements.confirmModal.classList.remove("hidden");
+  }
+
+  function closeConfirmModal() {
+    state.pendingDeleteId = "";
+    elements.confirmModal.classList.add("hidden");
   }
 
   async function confirmDeleteDocument() {
@@ -425,36 +413,30 @@ const Vaultify = window.Vaultify;
     }
   }
 
-  Object.values(filters).forEach((element) => {
-    element.addEventListener("input", () => {
-      fetchDocuments().catch((error) => {
-        Vaultify.showMessage(error.message || "Unable to fetch documents.", "error");
-      });
+  function refreshDocumentsWithMessage() {
+    fetchDocuments().catch((error) => {
+      Vaultify.showMessage(error.message || "Unable to fetch documents.", "error");
     });
+  }
 
-    element.addEventListener("change", () => {
-      fetchDocuments().catch((error) => {
-        Vaultify.showMessage(error.message || "Unable to fetch documents.", "error");
-      });
-    });
+  Object.values(filters).forEach((element) => {
+    element.addEventListener("input", refreshDocumentsWithMessage);
+    element.addEventListener("change", refreshDocumentsWithMessage);
   });
 
-  documentForm.addEventListener("submit", async (event) => {
+  elements.documentForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const documentId = document.getElementById("documentId").value;
-    const fileInput = document.getElementById("file");
-
-    if (!documentId && !fileInput.files.length) {
+    const documentId = elements.documentId.value;
+    if (!documentId && !elements.file.files.length) {
       Vaultify.showMessage("Please choose a file to upload.", "error");
       return;
     }
 
     try {
-      const formData = new FormData(documentForm);
       await Vaultify.apiFetch(documentId ? `/api/documents/${documentId}` : "/api/documents", {
         method: documentId ? "PUT" : "POST",
-        body: formData
+        body: new FormData(elements.documentForm)
       });
 
       Vaultify.showMessage(documentId ? "Document updated successfully." : "Document added successfully.");
@@ -465,29 +447,20 @@ const Vaultify = window.Vaultify;
     }
   });
 
-  documentsGrid.addEventListener("click", (event) => {
+  elements.documentsGrid.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-action]");
 
     if (button) {
       const { action, id } = button.dataset;
 
       if (action === "preview") {
-        handlePreviewDocument(id);
-        return;
-      }
-
-      if (action === "open") {
+        showPreview(id);
+      } else if (action === "open") {
         openDocumentFile(id);
-        return;
-      }
-
-      if (action === "edit") {
-        handleEditDocument(id);
-        return;
-      }
-
-      if (action === "delete") {
-        handleDeleteDocument(id);
+      } else if (action === "edit") {
+        startEditing(id);
+      } else if (action === "delete") {
+        openDeleteModal(id);
       }
 
       return;
@@ -495,40 +468,40 @@ const Vaultify = window.Vaultify;
 
     const card = event.target.closest("[data-preview-id]");
     if (card) {
-      handlePreviewDocument(card.dataset.previewId);
+      showPreview(card.dataset.previewId);
     }
   });
 
-  previewOpenBtn.addEventListener("click", () => {
+  elements.previewOpenBtn.addEventListener("click", () => {
     if (state.selectedDocumentId) {
-      openDocumentFile(state.selectedDocumentId).catch((error) => {
-        Vaultify.showMessage(error.message || "Unable to open the document.", "error");
-      });
+      openDocumentFile(state.selectedDocumentId);
     }
   });
 
-  previewEditBtn.addEventListener("click", () => {
+  elements.previewEditBtn.addEventListener("click", () => {
     if (state.selectedDocumentId) {
-      handleEditDocument(state.selectedDocumentId);
+      startEditing(state.selectedDocumentId);
     }
   });
 
-  closeConfirmBtn.addEventListener("click", closeConfirmModal);
-  cancelConfirmBtn.addEventListener("click", closeConfirmModal);
-  confirmModal.addEventListener("click", (event) => {
-    if (event.target === confirmModal) {
+  [elements.closeConfirmBtn, elements.cancelConfirmBtn]
+    .forEach((button) => button.addEventListener("click", closeConfirmModal));
+
+  elements.confirmModal.addEventListener("click", (event) => {
+    if (event.target === elements.confirmModal) {
       closeConfirmModal();
     }
   });
-  confirmActionBtn.addEventListener("click", () => {
+
+  elements.confirmActionBtn.addEventListener("click", () => {
     confirmDeleteDocument().catch((error) => {
       Vaultify.showMessage(error.message || "Delete failed.", "error");
     });
   });
 
-  cancelEditBtn.addEventListener("click", resetDocumentForm);
+  elements.cancelEditBtn.addEventListener("click", resetDocumentForm);
 
-  logoutBtn.addEventListener("click", async () => {
+  elements.logoutBtn.addEventListener("click", async () => {
     try {
       await Vaultify.apiFetch("/api/auth/logout", {
         method: "POST"

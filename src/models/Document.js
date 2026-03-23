@@ -34,14 +34,6 @@ const documentSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    storedFileName: {
-      type: String,
-      default: null
-    },
-    filePath: {
-      type: String,
-      default: null
-    },
     gridFsFileId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null
@@ -73,8 +65,6 @@ const documentSchema = new mongoose.Schema(
         }
 
         ret.downloadUrl = `/api/documents/${ret._id}/file`;
-        delete ret.filePath;
-        delete ret.storedFileName;
         delete ret.gridFsFileId;
         delete ret.__v;
 

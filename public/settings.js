@@ -54,7 +54,7 @@ const Vaultify = window.Vaultify;
   async function refreshUser() {
     const payload = await Vaultify.apiFetch("/api/auth/me");
     state.currentUser = payload.user;
-    localStorage.setItem("vaultifyUser", JSON.stringify(payload.user));
+    Vaultify.setStoredUser(payload.user);
     renderUser();
   }
 
@@ -72,7 +72,7 @@ const Vaultify = window.Vaultify;
       });
 
       state.currentUser = payload.user;
-      localStorage.setItem("vaultifyUser", JSON.stringify(payload.user));
+      Vaultify.setStoredUser(payload.user);
       renderUser();
       Vaultify.showMessage("Account settings updated successfully.");
     } catch (error) {

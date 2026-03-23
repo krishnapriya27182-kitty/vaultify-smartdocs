@@ -1,0 +1,88 @@
+@media (max-width: 980px) {
+  .auth-layout,
+  .hero,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card {
+    justify-self: stretch;
+    max-width: none;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-strip,
+  .settings-header,
+  .settings-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .split-inputs,
+  .settings-grid,
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1240px) {
+  .app-layout,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar,
+  .workspace-stack {
+    position: static;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 1120px) {
+  .auth-layout.signup-mode {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 20px, 1200px);
+    padding-top: 20px;
+  }
+
+  .panel,
+  .hero-card {
+    padding: 18px;
+  }
+
+  .app-sidebar {
+    padding: 20px 16px;
+  }
+
+  .panel-heading,
+  .toolbar,
+  .profile-strip,
+  .inline-actions,
+  .document-header,
+  .document-actions,
+  .preview-actions,
+  .modal-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .floating {
+    left: 10px;
+    right: 10px;
+    top: 12px;
+    min-width: auto;
+    max-width: none;
+  }
+}
