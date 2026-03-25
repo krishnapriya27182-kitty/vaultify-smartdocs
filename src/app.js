@@ -1,6 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
 
 const { MAX_FILE_SIZE_MB, PUBLIC_DIR } = require("./config/constants");
 const accountRoutes = require("./routes/accountRoutes");

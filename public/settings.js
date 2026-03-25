@@ -79,7 +79,7 @@ const Vaultify = window.Vaultify;
   });
 
   logoutBtn.addEventListener("click", async () => {
-    try { await Vaultify.apiFetch("/api/auth/logout", { method: "POST" }); } catch (_) {}
+    try { await Vaultify.apiFetch("/api/auth/logout", { method: "POST" }); } catch (_e) { /* ignore */ }
     Vaultify.clearSession();
     window.location.href = "/";
   });
