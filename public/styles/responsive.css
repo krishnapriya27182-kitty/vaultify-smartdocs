@@ -1,88 +1,74 @@
-@media (max-width: 980px) {
-  .auth-layout,
-  .hero,
-  .dashboard {
+@media (max-width: 1200px) {
+  .dash-body {
     grid-template-columns: 1fr;
   }
-
-  .auth-card {
-    justify-self: stretch;
-    max-width: none;
-  }
-
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .preview-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .support-strip,
-  .settings-header,
-  .settings-actions-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .split-inputs,
-  .settings-grid,
-  .settings-form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 1240px) {
-  .app-layout,
-  .dashboard {
-    grid-template-columns: 1fr;
-  }
-
-  .app-sidebar,
   .workspace-stack {
     position: static;
-    min-height: auto;
+  }
+  .metrics-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .settings-body {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 1120px) {
-  .auth-layout.signup-mode {
+@media (max-width: 900px) {
+  .app-shell {
     grid-template-columns: 1fr;
   }
+  .app-sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: var(--sp-3) var(--sp-4);
+    gap: var(--sp-2);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .sidebar-brand { margin-bottom: 0; }
+  .sidebar-nav {
+    flex-direction: row;
+    flex: none;
+    gap: var(--sp-1);
+  }
+  .sidebar-section-label { display: none; }
+  .sidebar-divider { display: none; }
+  .sidebar-bottom {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    margin-left: auto;
+  }
+  .sidebar-upload-btn { display: none; }
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+  .auth-left {
+    padding: var(--sp-8) var(--sp-6);
+    min-height: auto;
+  }
+  .auth-hero h1 { font-size: 2rem; }
+  .auth-features { display: none; }
 }
 
 @media (max-width: 640px) {
-  .page-shell {
-    width: min(100% - 20px, 1200px);
-    padding-top: 20px;
+  .dash-header { padding: var(--sp-6) var(--sp-4) var(--sp-8); }
+  .dash-header-inner { flex-direction: column; }
+  .metrics-strip {
+    grid-template-columns: 1fr 1fr;
+    margin: 0 var(--sp-4);
   }
-
-  .panel,
-  .hero-card {
-    padding: 18px;
-  }
-
-  .app-sidebar {
-    padding: 20px 16px;
-  }
-
-  .panel-heading,
-  .toolbar,
-  .profile-strip,
-  .inline-actions,
-  .document-header,
-  .document-actions,
-  .preview-actions,
-  .modal-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .floating {
-    left: 10px;
-    right: 10px;
-    top: 12px;
-    min-width: auto;
-    max-width: none;
-  }
+  .dash-body { padding: var(--sp-4); }
+  .settings-body { padding: var(--sp-4); }
+  .settings-header { padding: var(--sp-6) var(--sp-4); }
+  .settings-header-inner { flex-direction: column; }
+  .settings-form-grid { grid-template-columns: 1fr; }
+  .upload-form-row { grid-template-columns: 1fr; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-search { min-width: 0; }
+  .modal-card { padding: var(--sp-5); }
+  .toast { left: var(--sp-4); right: var(--sp-4); top: var(--sp-3); max-width: none; }
+  .preview-meta-grid { grid-template-columns: 1fr; }
+  .auth-right { padding: var(--sp-8) var(--sp-5); }
 }

@@ -1,288 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vaultify SmartDocs | Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="page-shell app-shell">
-      <div id="globalMessage" class="message floating hidden"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaultify SmartDocs | Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-shell">
 
-      <div class="app-layout">
-        <aside class="app-sidebar">
-          <div class="sidebar-brand">
-            <div class="brand-mark">V</div>
-            <div>
-              <strong>Vaultify</strong>
-              <p>SmartDocs</p>
+  <div id="globalMessage" class="toast hidden"></div>
+
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">V</div>
+        <div class="sidebar-brand-text">
+          <strong>Vaultify</strong>
+          <span>SmartDocs</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Main</span>
+
+        <a class="sidebar-link active" href="/dashboard.html">
+          <span class="material-icons">dashboard</span>
+          Dashboard
+        </a>
+
+        <button class="sidebar-link" type="button" data-scroll-target="allDocumentsSection">
+          <span class="material-icons">description</span>
+          All Documents
+        </button>
+
+        <button class="sidebar-link" type="button" data-scroll-target="notificationsPanel">
+          <span class="material-icons">notifications</span>
+          Smart Alerts
+          <span id="sidebarNotifBadge" class="notif-count hidden" style="margin-left:auto">0</span>
+        </button>
+
+        <span class="sidebar-section-label">Account</span>
+
+        <a class="sidebar-link" href="/settings.html">
+          <span class="material-icons">settings</span>
+          Account Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <button class="sidebar-upload-btn" type="button" data-scroll-target="documentFormPanel">
+        <span class="material-icons">cloud_upload</span>
+        Upload Document
+      </button>
+
+      <div class="sidebar-bottom">
+        <button id="logoutBtn" class="sidebar-logout" type="button">
+          <span class="material-icons">logout</span>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="app-content">
+
+      <!-- Hero header -->
+      <header class="dash-header">
+        <div class="dash-header-inner">
+          <div class="dash-header-left">
+            <p class="eyebrow">Personal Dashboard</p>
+            <h1 id="welcomeHeading">Welcome, [Username]</h1>
+            <p>Upload, categorize, search, edit, and track expiry dates for your personal records.</p>
+          </div>
+          <div class="user-chip">
+            <div id="userInitials" class="user-avatar">VU</div>
+            <div class="user-chip-info">
+              <strong id="userName">Vaultify User</strong>
+              <span id="userEmail">user@example.com</span>
             </div>
           </div>
+        </div>
+      </header>
 
-          <nav class="sidebar-nav">
-            <a class="sidebar-link active" href="/dashboard.html">Dashboard</a>
-            <button class="sidebar-link" type="button" data-scroll-target="allDocumentsSection">
-              All Documents
-            </button>
-            <button class="sidebar-link" type="button" data-scroll-target="notificationsPanel">
-              Smart Alerts
-            </button>
-            <a class="sidebar-link" href="/settings.html">Account Settings</a>
-          </nav>
-
-          <button class="sidebar-upload" type="button" data-scroll-target="documentFormPanel">
-            Upload Document
-          </button>
-
-          <button id="logoutBtn" class="ghost sidebar-logout" type="button">
-            Logout
-          </button>
-
-          <div class="sidebar-meta">
-            <p>Support</p>
-            <p>Protected Vault Experience</p>
+      <!-- Metrics strip -->
+      <div class="metrics-strip">
+        <div class="metric-card">
+          <div class="metric-icon green">
+            <span class="material-icons icon-sm">description</span>
           </div>
-        </aside>
+          <div class="metric-value" id="totalDocs">0</div>
+          <div class="metric-label">Total Documents</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon amber">
+            <span class="material-icons icon-sm">schedule</span>
+          </div>
+          <div class="metric-value" id="expiringDocs">0</div>
+          <div class="metric-label">Expiring Soon</div>
+          <div class="metric-sub">Review required</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon blue">
+            <span class="material-icons icon-sm">category</span>
+          </div>
+          <div class="metric-value" id="categoryCount">0</div>
+          <div class="metric-label">Categories Used</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon gold">
+            <span class="material-icons icon-sm">storage</span>
+          </div>
+          <div class="metric-value" id="storageUsage" style="font-size:1.25rem">0 MB</div>
+          <div class="metric-label">Storage Used</div>
+          <div class="progress-track" style="margin-top:var(--sp-2)">
+            <div id="storageUsageBar" class="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
 
-        <div class="app-content">
-          <header id="dashboardTop" class="hero">
-            <div>
-              <p class="eyebrow">Personal Dashboard</p>
-              <h1 id="welcomeHeading">Welcome, [Username]</h1>
-              <p class="hero-copy">
-                Upload, categorize, search, edit, and track expiry dates for your
-                own personal records in a protected vault.
-              </p>
+      <!-- Dashboard body -->
+      <div class="dash-body">
 
-              <div class="profile-strip">
-                <div class="user-chip">
-                  <span id="userInitials" class="user-initials">VU</span>
-                  <div>
-                    <strong id="userName">Vaultify User</strong>
-                    <p id="userEmail">user@example.com</p>
-                  </div>
-                </div>
-              </div>
+        <!-- Left: documents list -->
+        <div>
+          <!-- Notifications -->
+          <div id="notificationsPanel" class="notifications-panel hidden">
+            <div class="notif-header">
+              <h3>
+                <span class="material-icons">notification_important</span>
+                Smart Alerts
+              </h3>
+              <span id="notificationCount" class="notif-count">0</span>
+            </div>
+            <div id="notificationsList" class="notif-list"></div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <div class="form-input-icon toolbar-search">
+              <span class="material-icons">search</span>
+              <input class="form-input" type="search" id="searchInput" placeholder="Search by title, description, or tag" />
+            </div>
+            <select class="form-select" id="categoryFilter">
+              <option value="">All Categories</option>
+              <option value="ID Proof">ID Proof</option>
+              <option value="Education">Education</option>
+              <option value="Finance">Finance</option>
+              <option value="Medical">Medical</option>
+              <option value="Professional">Professional</option>
+              <option value="Personal">Personal</option>
+            </select>
+            <select class="form-select" id="statusFilter">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="expiring-soon">Expiring Soon</option>
+              <option value="expired">Expired</option>
+              <option value="no-expiry">No Expiry</option>
+            </select>
+            <select class="form-select" id="sortFilter">
+              <option value="recent">Sort: Recent</option>
+              <option value="name">Sort: Name</option>
+              <option value="expiry">Sort: Expiry</option>
+              <option value="updated">Sort: Updated</option>
+            </select>
+          </div>
+
+          <!-- Documents grid -->
+          <section id="allDocumentsSection">
+            <div id="documentsGrid" class="documents-grid"></div>
+          </section>
+        </div>
+
+        <!-- Right: preview + upload form -->
+        <div class="workspace-stack">
+
+          <!-- Quick Preview -->
+          <section id="quickPreviewPanel" class="panel preview-panel">
+            <div class="panel-heading">
+              <h2>Quick Preview</h2>
+              <span id="previewStatus" class="chip chip-no-expiry">No Selection</span>
             </div>
 
-            <div class="hero-card">
-              <div class="metric">
-                <span id="totalDocs">0</span>
-                <p>Total Documents</p>
-              </div>
-              <div class="metric metric-warning">
-                <span id="expiringDocs">0</span>
-                <p>Expiring Soon</p>
-              </div>
-              <div class="metric">
-                <span id="categoryCount">0</span>
-                <p>Categories Used</p>
-              </div>
-              <div class="metric">
-                <span id="storageUsage">0 MB</span>
-                <p>Storage Used</p>
-                <div class="progress-bar">
-                  <span id="storageUsageBar"></span>
+            <div id="previewEmptyState" class="preview-empty">
+              <span class="material-icons">find_in_page</span>
+              Select a document card to see its details here.
+            </div>
+
+            <div id="previewDetails" class="preview-details hidden">
+              <div class="preview-doc-header">
+                <div class="preview-doc-icon">
+                  <span class="material-icons">description</span>
                 </div>
+                <div>
+                  <div id="previewCategory" class="preview-doc-category">Category</div>
+                  <div id="previewTitle" class="preview-doc-title">Document Title</div>
+                </div>
+              </div>
+
+              <div class="preview-meta-grid">
+                <div class="preview-meta-item">
+                  <div class="preview-meta-label">File Name</div>
+                  <div id="previewFileName" class="preview-meta-value">—</div>
+                </div>
+                <div class="preview-meta-item">
+                  <div class="preview-meta-label">Upload Date</div>
+                  <div id="previewUploadDate" class="preview-meta-value">—</div>
+                </div>
+                <div class="preview-meta-item">
+                  <div class="preview-meta-label">Expiry Date</div>
+                  <div id="previewExpiryDate" class="preview-meta-value">—</div>
+                </div>
+                <div class="preview-meta-item">
+                  <div class="preview-meta-label">Last Updated</div>
+                  <div id="previewLastUpdated" class="preview-meta-value">—</div>
+                </div>
+              </div>
+
+              <div class="preview-meta-item" style="margin-bottom:var(--sp-3)">
+                <div class="preview-meta-label">Notes</div>
+                <div id="previewDescription" class="preview-meta-value">—</div>
+              </div>
+
+              <div class="preview-tags-row" id="previewTags"></div>
+
+              <div class="preview-actions">
+                <button id="previewOpenBtn" class="btn btn-ghost btn-sm" type="button">
+                  <span class="material-icons icon-sm">open_in_new</span>
+                  Open File
+                </button>
+                <button id="previewEditBtn" class="btn btn-primary btn-sm" type="button">
+                  <span class="material-icons icon-sm">edit</span>
+                  Edit
+                </button>
               </div>
             </div>
-          </header>
+          </section>
 
-          <main class="dashboard">
-            <section id="allDocumentsSection" class="panel records-panel">
-              <div id="notificationsPanel" class="notifications-panel hidden">
-                <div class="panel-heading">
-                  <h2>Smart Alerts</h2>
-                  <span id="notificationCount" class="count-pill">0</span>
-                </div>
-                <div id="notificationsList" class="notifications-list"></div>
-              </div>
-
-              <div class="toolbar">
-                <input
-                  type="search"
-                  id="searchInput"
-                  placeholder="Search by title, description, or tag"
-                />
-                <select id="categoryFilter">
-                  <option value="">All Categories</option>
-                  <option value="ID Proof">ID Proof</option>
-                  <option value="Education">Education</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Medical">Medical</option>
-                  <option value="Professional">Professional</option>
-                  <option value="Personal">Personal</option>
-                </select>
-                <select id="statusFilter">
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="expiring-soon">Expiring Soon</option>
-                  <option value="expired">Expired</option>
-                  <option value="no-expiry">No Expiry</option>
-                </select>
-                <select id="sortFilter">
-                  <option value="recent">Sort by Recent</option>
-                  <option value="name">Sort by Name</option>
-                  <option value="expiry">Sort by Expiry</option>
-                  <option value="updated">Sort by Last Updated</option>
-                </select>
-              </div>
-
-              <div id="documentsGrid" class="documents-grid"></div>
-            </section>
-
-            <div class="workspace-stack">
-              <section id="quickPreviewPanel" class="panel preview-panel">
-                <div class="panel-heading">
-                  <h2>Quick Preview</h2>
-                  <span id="previewStatus" class="status-pill status-no-expiry">
-                    No Selection
-                  </span>
-                </div>
-
-                <div id="previewEmptyState" class="preview-empty">
-                  Select a document card to see its details instantly here.
-                </div>
-
-                <div id="previewDetails" class="hidden">
-                  <div class="preview-header">
-                    <p id="previewCategory" class="document-category">Category</p>
-                    <h3 id="previewTitle" class="document-title">Document title</h3>
-                  </div>
-
-                  <div class="preview-grid">
-                    <div>
-                      <span class="preview-label">File Name</span>
-                      <p id="previewFileName" class="preview-value">-</p>
-                    </div>
-                    <div>
-                      <span class="preview-label">Upload Date</span>
-                      <p id="previewUploadDate" class="preview-value">-</p>
-                    </div>
-                    <div>
-                      <span class="preview-label">Expiry Date</span>
-                      <p id="previewExpiryDate" class="preview-value">-</p>
-                    </div>
-                    <div>
-                      <span class="preview-label">Last Updated</span>
-                      <p id="previewLastUpdated" class="preview-value">-</p>
-                    </div>
-                  </div>
-
-                  <div class="preview-notes">
-                    <span class="preview-label">Notes</span>
-                    <p id="previewDescription" class="preview-value">-</p>
-                  </div>
-
-                  <div class="preview-notes">
-                    <span class="preview-label">Tags</span>
-                    <p id="previewTags" class="preview-value">-</p>
-                  </div>
-
-                  <div class="preview-actions">
-                    <button id="previewOpenBtn" class="ghost" type="button">
-                      Open File
-                    </button>
-                    <button id="previewEditBtn" class="primary" type="button">
-                      Edit Document
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              <section id="documentFormPanel" class="panel form-panel">
-                <div class="panel-heading">
-                  <h2 id="formTitle">Add New Document</h2>
-                  <button id="cancelEditBtn" class="ghost hidden" type="button">
-                    Cancel Edit
-                  </button>
-                </div>
-
-                <form id="documentForm">
-                  <input type="hidden" id="documentId" />
-
-                  <label>
-                    Title
-                    <input type="text" id="title" name="title" required />
-                  </label>
-
-                  <label>
-                    Category
-                    <select id="category" name="category" required>
-                      <option value="">Select category</option>
-                      <option value="ID Proof">ID Proof</option>
-                      <option value="Education">Education</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Medical">Medical</option>
-                      <option value="Professional">Professional</option>
-                      <option value="Personal">Personal</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Description
-                    <textarea id="description" name="description" rows="4"></textarea>
-                  </label>
-
-                  <label>
-                    Expiry Date
-                    <input type="date" id="expiryDate" name="expiryDate" />
-                  </label>
-
-                  <label>
-                    Tags
-                    <input
-                      type="text"
-                      id="tags"
-                      name="tags"
-                      placeholder="passport, tax, degree"
-                    />
-                  </label>
-
-                  <label id="fileLabel">
-                    Upload File
-                    <input type="file" id="file" name="file" required />
-                  </label>
-
-                  <button class="primary" type="submit" id="submitBtn">
-                    Save Document
-                  </button>
-                </form>
-              </section>
+          <!-- Upload / Edit Form -->
+          <section id="documentFormPanel" class="panel upload-panel">
+            <div class="panel-heading">
+              <h2 id="formTitle">Add New Document</h2>
+              <button id="cancelEditBtn" class="btn btn-ghost btn-sm hidden" type="button">
+                <span class="material-icons icon-sm">close</span>
+                Cancel
+              </button>
             </div>
-          </main>
+
+            <form id="documentForm" class="upload-form-grid">
+              <input type="hidden" id="documentId" />
+
+              <div class="upload-drop-zone" id="dropZone">
+                <span class="material-icons">cloud_upload</span>
+                <p>Drag and drop your file here</p>
+                <p class="upload-hint">PDF, JPG, PNG — up to 10 MB</p>
+              </div>
+
+              <label id="fileLabel" class="form-group">
+                <span class="form-label">Select File</span>
+                <input class="form-input" type="file" id="file" name="file" required />
+              </label>
+
+              <div class="upload-form-row">
+                <div class="form-group">
+                  <label class="form-label" for="title">Document Title</label>
+                  <input class="form-input" type="text" id="title" name="title" placeholder="e.g. International Passport" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="category">Category</label>
+                  <select class="form-select" id="category" name="category" required>
+                    <option value="">Select category</option>
+                    <option value="ID Proof">ID Proof</option>
+                    <option value="Education">Education</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Professional">Professional</option>
+                    <option value="Personal">Personal</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="description">Notes / Description</label>
+                <textarea class="form-textarea" id="description" name="description" rows="3" placeholder="Optional notes about this document"></textarea>
+              </div>
+
+              <div class="upload-form-row">
+                <div class="form-group">
+                  <label class="form-label" for="expiryDate">Expiry Date</label>
+                  <input class="form-input" type="date" id="expiryDate" name="expiryDate" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="tags">Tags</label>
+                  <input class="form-input" type="text" id="tags" name="tags" placeholder="passport, travel, official" />
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-full" type="submit" id="submitBtn">
+                <span class="material-icons icon-sm">save</span>
+                Save Document
+              </button>
+            </form>
+          </section>
+
         </div>
       </div>
     </div>
+  </div>
 
-    <div id="confirmModal" class="modal hidden">
-      <div class="modal-card">
-        <div class="panel-heading">
-          <h2>Confirm Delete</h2>
-          <button id="closeConfirmBtn" class="ghost" type="button">Close</button>
-        </div>
-
-        <p id="confirmMessage" class="modal-copy">
-          Are you sure you want to delete this document?
-        </p>
-
-        <div class="modal-actions">
-          <button id="cancelConfirmBtn" class="ghost" type="button">Cancel</button>
-          <button id="confirmActionBtn" class="danger-btn danger-strong" type="button">
-            Delete Document
-          </button>
-        </div>
+  <!-- Delete Confirm Modal -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="panel-heading">
+        <h2>Delete Document</h2>
+        <button id="closeConfirmBtn" class="btn-icon" type="button">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <p id="confirmMessage">Are you sure you want to delete this document? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="cancelConfirmBtn" class="btn btn-ghost" type="button">Cancel</button>
+        <button id="confirmActionBtn" class="btn btn-danger-strong" type="button">
+          <span class="material-icons icon-sm">delete</span>
+          Delete
+        </button>
       </div>
     </div>
+  </div>
 
-    <script src="common.js"></script>
-    <script src="dashboard.js"></script>
-  </body>
+  <script src="common.js"></script>
+  <script src="dashboard.js"></script>
+</body>
 </html>

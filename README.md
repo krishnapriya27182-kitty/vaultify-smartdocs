@@ -1,232 +1,151 @@
-# Vaultify SmartDocs - 25BCNA49_Sarala J S
+# Vaultify SmartDocs — Assignment Submission
 
-Vaultify SmartDocs is a full-stack document management web application where every user has a personal account, a private dashboard, and a secure place to manage their important files online.
+**Project Title:** Vaultify SmartDocs - 23BCS_KrishnaPriya
 
-## Features
+---
 
-- User sign up and sign in with personal email and password
-- Private user-specific dashboard so each person sees only their own documents
-- Forgot-password flow with reset code support
-- Recovery email and notification preference in account settings
-- Upload documents with title, category, description, tags, and expiry date
-- View, search, filter, edit, and delete documents
-- Sort documents by recent upload, name, expiry, and last updated time
-- Quick preview panel with upload date, expiry date, notes, tags, and file details
-- Expiry tracking for active, expiring soon, expired, and no-expiry documents
-- In-app notification center for expiring documents and storage alerts
-- Per-user storage quota tracking with live usage progress
-- Dashboard summary cards for total documents, expiring documents, categories used, and storage
-- MongoDB-backed file storage using GridFS so uploaded files persist in production
-- Quality workflow with GitHub Actions CI, linting, and tests
-- Render-ready deployment setup using `render.yaml`
+## Project Abstract
+
+Managing personal documents like passports, insurance policies, and certificates is often disorganized, leading to missed renewals and lost files. Vaultify SmartDocs solves this by providing a secure, personal digital vault where users can upload, categorize, search, and track expiry dates for all their important documents. Key features include smart expiry alerts, category-based filtering, file preview, and a full CRUD document management system. The platform is built for real-world use cases such as students tracking academic certificates, professionals managing work permits, and individuals organizing identity documents.
+
+---
 
 ## Tech Stack
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js, Express
-- Database: MongoDB with Mongoose and GridFS
-- Deployment: Render
-- Quality: ESLint, custom Node.js test runner, GitHub Actions CI
+- **Frontend:** HTML5, CSS3 (custom design system), Vanilla JavaScript, Material Icons, Manrope + Inter fonts
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB Atlas (cloud-hosted)
+- **Storage:** GridFS (MongoDB file storage)
+- **CI/CD:** GitHub Actions (build, lint, test, deploy), CircleCI
+- **Hosting:** Render (web service + database)
+- **FTP Deploy:** GitHub Actions FTP workflow
+- **Domain/DNS:** Render custom domain + CNAME (see DNS.md)
+
+---
+
+## Modern Web Development Workflow
+
+```
+Local Git Repo  →  GitHub  →  CI/CD (GitHub Actions + CircleCI)  →  Render Hosting
+     ↓                              ↓ Testing + Linting                    ↓
+MongoDB Atlas                    FTP Deploy                         Domain + DNS
+```
+
+---
+
+## Four Pages
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Sign In | `/` | Login with email + password, forgot password flow |
+| Sign Up | `/signup.html` | Create account with name, email, recovery email |
+| Dashboard | `/dashboard.html` | Full CRUD document management, smart alerts, preview |
+| Account Settings | `/settings.html` | Edit profile, change password, storage overview |
+
+---
+
+## CRUD Operations
+
+| Operation | Endpoint | Description |
+|-----------|----------|-------------|
+| **Create** | `POST /api/documents` | Upload a new document with file |
+| **Read** | `GET /api/documents` | List all documents with search/filter |
+| **Read** | `GET /api/documents/:id/file` | Stream/preview a document file |
+| **Update** | `PUT /api/documents/:id` | Edit document metadata or replace file |
+| **Delete** | `DELETE /api/documents/:id` | Permanently delete document + file |
+
+Auth CRUD: signup, login, forgot-password, reset-password, update account settings.
+
+---
+
+## Setup Instructions
+
+### 1. Clone and install
+
+```bash
+git clone <your-repo-url>
+cd vaultify-smartdocs
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+# Edit .env and set your MONGODB_URI
+```
+
+### 3. Fix MongoDB Atlas IP Access (REQUIRED)
+
+The app uses MongoDB Atlas. You must whitelist your IP:
+
+1. Go to [MongoDB Atlas](https://cloud.mongodb.com)
+2. Select your cluster → **Network Access**
+3. Click **Add IP Address**
+4. Add `0.0.0.0/0` (allow from anywhere) — or add your specific IP
+5. Click **Confirm**
+
+Without this step the server will fail to connect with `ECONNREFUSED`.
+
+### 4. Start local MongoDB (optional, for local dev)
+
+```bash
+docker-compose up -d
+# Then set MONGODB_URI=mongodb://127.0.0.1:27017/vaultify-smartdocs in .env
+```
+
+### 5. Run the server
+
+```bash
+node server.js
+# Open http://localhost:3000
+```
+
+### 6. Run tests
+
+```bash
+node tests/run-tests.js
+```
+
+### 7. Run lint
+
+```bash
+node_modules/.bin/eslint . --ext .js
+```
+
+---
 
 ## Project Structure
 
-```text
-project/
-|-- public/
-|   |-- index.html
-|   |-- styles.css
-|   `-- script.js
-|-- src/
-|   `-- models/
-|       |-- Document.js
-|       `-- User.js
-|-- uploads/
-|-- .env.example
-|-- .gitignore
-|-- package.json
-|-- README.md
-|-- render.yaml
-`-- server.js
 ```
-
-## Local Setup
-
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Create a `.env` file from `.env.example`.
-
-3. Ensure MongoDB is running locally, or use a remote MongoDB connection string.
-
-4. Start the app:
-
-   ```bash
-   npm start
-   ```
-
-5. Open `http://localhost:3000`
-
-## Environment Variables
-
-- `MONGODB_URI` - MongoDB connection string
-- `PORT` - server port
-- `RESET_CODE_EXPIRY_MINUTES` - forgot-password reset code validity time
-- `MAX_FILE_SIZE_MB` - maximum upload size in megabytes
-
-## Workflow Match
-
-This project now follows the required modern workflow:
-
-```text
-Local Git Repository -> GitHub -> GitHub Actions (CI) -> Render (CD) -> Web Browser
-                                         |
-                                         -> MongoDB Atlas
+vaultify-smartdocs/
+├── .circleci/config.yml          # CircleCI pipeline
+├── .github/workflows/
+│   ├── build.yml                 # Build & test on push
+│   ├── ci.yml                    # Continuous integration
+│   ├── deploy-render.yml         # Auto-deploy to Render
+│   └── ftp-deploy.yml            # FTP upload after build
+├── public/                       # Frontend (HTML + CSS + JS)
+│   ├── index.html                # Sign In page
+│   ├── signup.html               # Sign Up page
+│   ├── dashboard.html            # Main dashboard
+│   ├── settings.html             # Account settings
+│   ├── common.js                 # Shared utilities
+│   ├── login.js / signup.js / dashboard.js / settings.js
+│   ├── styles.css                # CSS entry point
+│   └── styles/                   # CSS modules
+├── src/                          # Backend (Node.js + Express)
+│   ├── app.js                    # Express app
+│   ├── config/constants.js
+│   ├── middleware/               # Auth + upload middleware
+│   ├── models/                   # User + Document schemas
+│   ├── routes/                   # API route handlers
+│   ├── services/                 # Storage + notification services
+│   └── utils/authHelpers.js
+├── tests/run-tests.js            # Unit tests (5 passing)
+├── docker-compose.yml            # Local MongoDB container
+├── DNS.md                        # Custom domain setup guide
+├── render.yaml                   # Render deployment config
+├── .env.example                  # Environment template
+└── server.js                     # Entry point
 ```
-
-- Local Git repository contains frontend, backend, and database-connected code
-- GitHub stores the source code and triggers automatic quality checks
-- GitHub Actions runs linting and tests on push and pull request
-- Render auto-deploys the latest GitHub code to a public website
-- MongoDB Atlas stores dynamic user accounts, metadata, and uploaded files
-
-## Optional FTP Workflow
-
-If your project rubric specifically asks for FTP in the deployment flow, this repository now also includes an FTP deployment workflow in [.github/workflows/ftp-deploy.yml](.github/workflows/ftp-deploy.yml).
-
-```text
-Local Git Repository -> GitHub -> GitHub Actions -> FTP Server -> Node-capable Hosting Panel -> Web Browser
-                                                         |
-                                                         -> MongoDB Atlas
-```
-
-Important:
-
-- FTP is added as an optional deployment path for academic workflow requirements.
-- For this Node.js + MongoDB app, Render is still the easiest and safest production host.
-- FTP alone does not run a Node.js server. Your FTP hosting provider must support Node.js apps separately if you want to use FTP for live hosting.
-- If your host only supports static files or PHP, then FTP can upload the project files, but it cannot replace Render as the running backend host.
-
-### GitHub Secrets Required For FTP
-
-Add these repository secrets in GitHub before running the FTP workflow:
-
-- `FTP_SERVER`
-- `FTP_USERNAME`
-- `FTP_PASSWORD`
-- `FTP_SERVER_DIR`
-
-By default the workflow uses `FTPS` on port `21`. If your hosting provider uses plain FTP or a different port, update [.github/workflows/ftp-deploy.yml](.github/workflows/ftp-deploy.yml).
-
-### Run FTP Deployment
-
-1. Open your GitHub repository
-2. Go to `Settings -> Secrets and variables -> Actions`
-3. Add the FTP secrets listed above
-4. Go to `Actions`
-5. Open the `FTP Deploy` workflow
-6. Click `Run workflow`
-
-The workflow first runs linting and tests, then uploads the project files over FTP.
-
-## Quality Checks
-
-- Run linting:
-
-  ```bash
-  npm run lint
-  ```
-
-- Run tests:
-
-  ```bash
-  npm test
-  ```
-
-- Run both together:
-
-  ```bash
-  npm run check
-  ```
-
-## Render Deployment
-
-### What changed for Render
-
-Render does not preserve normal local file uploads across redeploys on free services, so this project now stores uploaded documents in MongoDB GridFS. That means document files remain available even after redeploys and restarts, as long as your MongoDB database stays active.
-
-### Deploy from GitHub to Render
-
-1. Push this project to a GitHub repository.
-2. Create a MongoDB Atlas database, or use another remote MongoDB instance.
-3. In Render, create a new Blueprint or Web Service connected to your GitHub repo.
-4. If using Blueprint deployment, Render will detect `render.yaml` automatically.
-5. Add the `MONGODB_URI` environment variable in Render with your remote MongoDB connection string.
-6. Deploy the app. Future pushes to `main` will trigger automatic redeploys on Render.
-7. After deployment, open your public Render URL:
-
-   ```text
-   https://your-service-name.onrender.com
-   ```
-
-## GitHub Push Commands
-
-```bash
-git init
-git add .
-git commit -m "Prepare Vaultify SmartDocs for Render deployment"
-git branch -M main
-git remote add origin <your-github-repo-url>
-git push -u origin main
-```
-
-## API Endpoints
-
-- `GET /health` - health check endpoint for Render
-- `POST /api/auth/signup` - create a new user account
-- `POST /api/auth/login` - sign in with email and password
-- `POST /api/auth/forgot-password` - generate a password reset code
-- `POST /api/auth/reset-password` - reset the password using email and reset code
-- `GET /api/auth/me` - get the signed-in user profile
-- `POST /api/auth/logout` - log out the current session
-- `GET /api/documents` - fetch the signed-in user's documents with search/filter support
-- `GET /api/documents/:id` - fetch one document for the signed-in user
-- `GET /api/documents/:id/file` - open a stored file for the signed-in user
-- `POST /api/documents` - create a document with file upload for the signed-in user
-- `PUT /api/documents/:id` - update document details or replace file
-- `DELETE /api/documents/:id` - delete a document and its uploaded file
-
-## Notes
-
-- User accounts, document details, and uploaded files are all stored dynamically in MongoDB.
-- No static or hardcoded records are used.
-- The forgot-password reset code is shown in the UI for demo purposes. In a production app, this should be sent through email.
-- Expiry reminders are currently available in the app dashboard. Real email reminders can be added later with SMTP or a mail service provider.
-- If you use Render Free, the service may sleep when inactive, so the first request can take a little longer.
-
-
-### Folder Explanation
-
-- public/ → Frontend (HTML, CSS, JavaScript)
-- src/ → Backend logic (models, database schema)
-- server.js → Backend entry point (Express server)
-
-## Architecture Overview
-
-This project follows a full-stack architecture:
-
-Frontend:
-Built using HTML, CSS, and JavaScript inside the public folder.
-
-Backend:
-Built using Node.js and Express, with the main server in server.js and models inside src/.
-
-Database:
-MongoDB Atlas is used with GridFS for storing both document metadata and uploaded files.
-
-Workflow:
-Local Development → GitHub → GitHub Actions (CI) → Render (Deployment) → Web Application
-
-Local uploads folder is used only during development. In production, files are stored in MongoDB GridFS.

@@ -37,8 +37,4 @@ app.use((error, _req, res, next) => {
   next();
 });
 
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
-});
-
 module.exports = app;
