@@ -205,3 +205,10 @@ git push -u origin main
 - The forgot-password reset code is shown in the UI for demo purposes. In a production app, this should be sent through email.
 - Expiry reminders are currently available in the app dashboard. Real email reminders can be added later with SMTP or a mail service provider.
 - If you use Render Free, the service may sleep when inactive, so the first request can take a little longer.
+
+
+### Folder Explanation
+
+- public/ → Frontend (HTML, CSS, JavaScript)
+- src/ → Backend logic (models, database schema)
+- server.js → Backend entry point (Express server)
