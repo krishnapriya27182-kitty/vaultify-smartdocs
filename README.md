@@ -212,3 +212,21 @@ git push -u origin main
 - public/ → Frontend (HTML, CSS, JavaScript)
 - src/ → Backend logic (models, database schema)
 - server.js → Backend entry point (Express server)
+
+## Architecture Overview
+
+This project follows a full-stack architecture:
+
+Frontend:
+Built using HTML, CSS, and JavaScript inside the public folder.
+
+Backend:
+Built using Node.js and Express, with the main server in server.js and models inside src/.
+
+Database:
+MongoDB Atlas is used with GridFS for storing both document metadata and uploaded files.
+
+Workflow:
+Local Development → GitHub → GitHub Actions (CI) → Render (Deployment) → Web Application
+
+Local uploads folder is used only during development. In production, files are stored in MongoDB GridFS.
