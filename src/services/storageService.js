@@ -28,11 +28,12 @@ async function syncUserStorageUsage(user) {
 }
 
 function getFileBucket() {
-  if (!mongoose.connection.db) {
-    throw new Error("MongoDB connection is not ready.");
+  const db = mongoose.connection.db || mongoose.connection.client?.db();
+  if (!db) {
+    throw new Error("MongoDB connection is not ready. Please try again.");
   }
 
-  return new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+  return new mongoose.mongo.GridFSBucket(db, {
     bucketName: "documentFiles"
   });
 }
